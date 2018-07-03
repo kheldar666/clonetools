@@ -1,8 +1,8 @@
 # Default Configuration. Please override all necessary value in config.cfg file
 
 # Configuration for RSYNC
-RSYNC_OPTIONS='-rav --delete'
-RSYNC_SSH_OPTIONS='-e ssh'
+RSYNC_OPTIONS=-rav --delete
+RSYNC_SSH_OPTIONS=-e ssh
 
 #Source and Destination Folders
 RSYNC_SRC_JIRA_FOLDER=someuser@somehost:/path/to/jira
