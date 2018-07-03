@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # loading external configuration
-source config.shlib;
+source ./config.shlib;
 
 RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
 RSYNC_SSH_OPTIONS="$(config_get RSYNC_SSH_OPTIONS)"
