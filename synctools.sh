@@ -20,7 +20,7 @@ RSYNC_DST_CONF_DATA_FOLDER="$(config_get RSYNC_DST_CONF_DATA_FOLDER)"
 
 # First we need to stop both local services
 /etc/init.d/jira stop
-if [ $1 -ne 0 ]; then
+if [ $? -ne 0 ]; then
 	read -p "JIRA did not shutdown properly, exiting? (Y/N)" yn
 	case $yn in
 		[Yy]* ) exit 1;;
@@ -29,7 +29,7 @@ if [ $1 -ne 0 ]; then
 fi
 
 /etc/init.d/confluence stop
-if [ $1 -ne 1 ]; then
+if [ $? -ne 1 ]; then
         read -p "Confluence did not shutdown properly, exiting? (Y/N)" yn
         case $yn in
                 [Yy]* ) exit 1;;
