@@ -1,0 +1,19 @@
+# Default Configuration. Please override all necessary value in config.cfg file
+
+# Configuration for RSYNC
+RSYNC_OPTIONS='-rav --delete'
+RSYNC_SSH_OPTIONS='-e ssh'
+
+#Source and Destination Folders
+RSYNC_SRC_JIRA_FOLDER=someuser@somehost:/path/to/jira
+RSYNC_DST_JIRA_FOLDER=/path/to/local/folder/jira
+
+
+RSYNC_SRC_JIRA_DATA_FOLDER=someuser@somehost:/path/to/data/jira
+RSYNC_DST_JIRA_DATA_FOLDER=/path/to/local/folder/data/jira
+
+RSYNC_SRC_CONF_FOLDER=someuser@somehost:/path/to/confluence
+RSYNC_DST_CONF_FOLDER=/path/to/local/folder/confluence
+
+RSYNC_SRC_CONF_DATA_FOLDER=someuser@somehost:/path/to/data/confluence
+RSYNC_DST_CONF_DATA_FOLDER=/path/to/local/folder/data/confluence
