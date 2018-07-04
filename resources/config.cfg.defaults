@@ -3,6 +3,7 @@
 # Configuration for RSYNC
 RSYNC_OPTIONS=-rav --delete
 RSYNC_SSH_OPTIONS=
+RSYNC_REMOTE_SUDO=
 
 #Source and Destination Folders
 RSYNC_SRC_JIRA_FOLDER=someuser@somehost:/path/to/jira

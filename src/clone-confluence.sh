@@ -5,6 +5,7 @@ source ./lib/config.shlib;
 
 RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
 RSYNC_SSH_OPTIONS="$(config_get RSYNC_SSH_OPTIONS)"
+RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
 
 RSYNC_SRC_CONF_FOLDER="$(config_get RSYNC_SRC_CONF_FOLDER)"
 RSYNC_DST_CONF_FOLDER="$(config_get RSYNC_DST_CONF_FOLDER)"
@@ -26,14 +27,22 @@ echo "Synching Confluence Program files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
     rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
 else
-    rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+    if [ ${#RSYNC_REMOTE_SUDO} -gt 0 ] ; then
+        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+    else
+        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+    fi
 fi
 
 echo "Synching Confluence Data files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
     rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
 else
-    rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
+    if [ ${#RSYNC_REMOTE_SUDO} -gt 0 ] ; then
+        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
+    else
+        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
+    fi
 fi
 
 # Now we need to cleanup the Configuration files
