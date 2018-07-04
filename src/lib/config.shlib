@@ -7,4 +7,5 @@ config_get() {
     if [ "${val}" = "__UNDEFINED__" ]; then
         val="$(config_read_file ../resources/config.cfg.defaults "${1}")";
     fi
+    printf -- "%s" "${val}";
 }
