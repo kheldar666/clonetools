@@ -23,10 +23,18 @@ fi
 
 # Now we sync all data from production to local folders
 echo "Synching Confluence Program files from Production to Local Folder"
-rsync $RSYNC_OPTIONS $RSYNC_SSH_OPTIONS $RSYNC_SRC_CONF_FOLDER $RSYNC_DST_CONF_FOLDER
+if [ ${RSYNC_SSH_OPTIONS} == '' ] ; then
+    rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+else
+    rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+fi
 
 echo "Synching Confluence Data files from Production to Local Folder"
-rsync $RSYNC_OPTIONS $RSYNC_SSH_OPTIONS $RSYNC_SRC_CONF_DATA_FOLDER $RSYNC_DST_CONF_DATA_FOLDER
+if [ ${RSYNC_SSH_OPTIONS} == '' ] ; then
+    rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
+else
+    rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
+fi
 
 # Now we need to cleanup the Configuration files
 
