@@ -25,23 +25,27 @@ fi
 # Now we sync all data from production to local folders
 echo "Synching JIRA Program files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
-   rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
+   rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
 else
-    if [ ${#RSYNC_REMOTE_SUDO} -gt 0 ] ; then
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
+    if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
+        rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
     else
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
     fi
 fi
+
+#Recreate the excluded folders
+mkdir -p ${RSYNC_DST_JIRA_FOLDER}/logs
+mkdir -p ${RSYNC_DST_JIRA_FOLDER}/temp
 
 echo "Synching JIRA Data files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
     rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
 else
-    if [ ${#RSYNC_REMOTE_SUDO} -gt 0 ] ; then
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
-    else
+    if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
         rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+    else
+        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     fi
 fi
 

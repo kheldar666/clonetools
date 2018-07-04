@@ -25,23 +25,27 @@ fi
 # Now we sync all data from production to local folders
 echo "Synching Confluence Program files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
-    rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+    rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
 else
-    if [ ${#RSYNC_REMOTE_SUDO} -gt 0 ] ; then
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+    if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
+        rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
     else
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
     fi
 fi
+
+#Recreate the excluded folders
+mkdir -p ${RSYNC_DST_CONF_FOLDER}/logs
+mkdir -p ${RSYNC_DST_CONF_FOLDER}/temp
 
 echo "Synching Confluence Data files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
     rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
 else
-    if [ ${#RSYNC_REMOTE_SUDO} -gt 0 ] ; then
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
-    else
+    if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
         rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
+    else
+        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_CONF_DATA_FOLDER} ${RSYNC_DST_CONF_DATA_FOLDER}
     fi
 fi
 
