@@ -56,6 +56,9 @@ else
     fi
 fi
 
+#Recreate the excluded folders
+mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/caches
+
 # Now we need to cleanup the Configuration files
 
 # We trigger a backup of the data on MySQL Server
