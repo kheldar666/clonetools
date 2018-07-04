@@ -3,9 +3,9 @@ config_read_file() {
 }
 
 config_get() {
-    val="$(config_read_file config.cfg "${1}")";
+    val="$(config_read_file ../../resources/config.cfg "${1}")";
     if [ "${val}" = "__UNDEFINED__" ]; then
-        val="$(config_read_file config.cfg.defaults "${1}")";
+        val="$(config_read_file ../../resources/config.cfg.defaults "${1}")";
     fi
     printf -- "%s" "${val}";
 }
