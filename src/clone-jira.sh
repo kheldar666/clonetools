@@ -24,6 +24,13 @@ if [ $? -ne 0 ]; then
 fi
 # Now we sync all data from production to local folders
 echo "Synching JIRA Program files from Production to Local Folder"
+
+# Making sure the destination folders exists
+mkdir -p ${RSYNC_DST_JIRA_FOLDER}
+mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}
+
+# Launching the rsync process
+
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
    rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" ${RSYNC_SRC_JIRA_FOLDER} ${RSYNC_DST_JIRA_FOLDER}
 else
@@ -40,12 +47,12 @@ mkdir -p ${RSYNC_DST_JIRA_FOLDER}/temp
 
 echo "Synching JIRA Data files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
-    rsync ${RSYNC_OPTIONS} ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+    rsync ${RSYNC_OPTIONS} --exclude="caches" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
 else
     if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="caches" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     else
-        rsync ${RSYNC_OPTIONS} -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="caches" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     fi
 fi
 

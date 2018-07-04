@@ -13,17 +13,24 @@ RSYNC_DST_CONF_FOLDER="$(config_get RSYNC_DST_CONF_FOLDER)"
 RSYNC_SRC_CONF_DATA_FOLDER="$(config_get RSYNC_SRC_CONF_DATA_FOLDER)"
 RSYNC_DST_CONF_DATA_FOLDER="$(config_get RSYNC_DST_CONF_DATA_FOLDER)"
 
+# First we need to stop local services
 /etc/init.d/confluence stop
 if [ $? -ne 1 ]; then
-        read -p "Confluence did not shutdown properly, exiting? (Y/N)" yn
-        case $yn in
-                [Yy]* ) exit 1;;
-                [Nn]* ) echo "Continuing....";
-        esac
+    read -p "Confluence did not shutdown properly, exiting? (Y/N)" yn
+    case $yn in
+            [Yy]* ) exit 1;;
+            [Nn]* ) echo "Continuing....";
+    esac
 fi
 
 # Now we sync all data from production to local folders
 echo "Synching Confluence Program files from Production to Local Folder"
+
+# Making sure the destination folder exists
+mkdir -p ${RSYNC_DST_CONF_FOLDER}
+mkdir -p ${RSYNC_DST_CONF_DATA_FOLDER}
+
+# Launching the rsync process
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
     rsync ${RSYNC_OPTIONS} --exclude="logs" --exclude="temp" ${RSYNC_SRC_CONF_FOLDER} ${RSYNC_DST_CONF_FOLDER}
 else
