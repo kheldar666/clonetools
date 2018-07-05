@@ -76,9 +76,9 @@ DB_NEW_USERNAME="$(config_get DB_NEW_USERNAME)"
 DB_NEW_PASSWORD="$(config_get DB_NEW_PASSWORD)"
 
 # We need to make sure to escape any ampersand sign to avoid problems with sed
-sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" ${RSYNC_DST_JIRA_FOLDER}/dbconfig.xml
-sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_JIRA_FOLDER}/dbconfig.xml
-sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_JIRA_FOLDER}/dbconfig.xml
+sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
+sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
+sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
 
 # We trigger a backup of the data on MySQL Server
 
