@@ -47,20 +47,27 @@ mkdir -p ${RSYNC_DST_JIRA_FOLDER}/temp
 
 echo "Synching JIRA Data files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
-    rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+    rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" --exclude="jira/log"  ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
 else
     if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
-        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" --exclude="jira/log" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     else
-        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" --exclude="jira/log" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     fi
 fi
 
 #Recreate the excluded folders
 mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/caches
 mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/jira/tmp
+mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/jira/log
 
 # Now we need to cleanup the Configuration files
+# jira-application.properties
+JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
+
+# We need to use # instead of / in the sed expression to be able to support the / in the path
+# https://www.unix.com/shell-programming-and-scripting/148161-expand-environment-variable-sed-when-variable-contains-slash.html
+sed -i 's#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g' ${RSYNC_DST_JIRA_DATA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
 
 # We trigger a backup of the data on MySQL Server
 
