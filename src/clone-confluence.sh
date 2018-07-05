@@ -4,14 +4,15 @@
 source ./lib/config.shlib;
 
 RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
-RSYNC_SSH_OPTIONS="$(config_get RSYNC_SSH_OPTIONS)"
+RSYNC_SSH_OPTIONS="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
 RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
 
-RSYNC_SRC_CONF_FOLDER="$(config_get RSYNC_SRC_CONF_FOLDER)"
-RSYNC_DST_CONF_FOLDER="$(config_get RSYNC_DST_CONF_FOLDER)"
+RSYNC_SRC_JIRA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_CONF_FOLDER)"
+RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_CONF_FOLDER)"
 
-RSYNC_SRC_CONF_DATA_FOLDER="$(config_get RSYNC_SRC_CONF_DATA_FOLDER)"
-RSYNC_DST_CONF_DATA_FOLDER="$(config_get RSYNC_DST_CONF_DATA_FOLDER)"
+RSYNC_SRC_JIRA_DATA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_CONF_DATA_FOLDER)"
+RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_CONF_DATA_FOLDER)"
+
 
 # First we need to stop local services
 /etc/init.d/confluence stop

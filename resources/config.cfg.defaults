@@ -1,8 +1,12 @@
 # Default Configuration. Please override all necessary value in config.cfg file
 
+# Configuration for SSH
+SSH_USER=someuser
+SSH_PRIV_KEY=/path/to/private/key
+SSH_SRC_HOST=somehost
+
 # Configuration for RSYNC
 RSYNC_OPTIONS=-rav --delete
-RSYNC_SSH_OPTIONS=
 RSYNC_REMOTE_SUDO=
 
 #Source and Destination Folders
