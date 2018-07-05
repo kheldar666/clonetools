@@ -63,7 +63,7 @@ mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/log
 
 # Now we need to cleanup the Configuration files
 # jira-application.properties
-JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_FOLDER}"
+JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
 
 # User the " instead of ' for the sed command to allow the expansion of the variables
 # We need to use # instead of / in the sed expression to be able to support the / in the path
