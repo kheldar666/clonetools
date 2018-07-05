@@ -58,8 +58,8 @@ fi
 
 #Recreate the excluded folders
 mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/caches
-mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/jira/tmp
-mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/jira/log
+mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/tmp
+mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/log
 
 # Now we need to cleanup the Configuration files
 # jira-application.properties
