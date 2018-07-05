@@ -63,11 +63,11 @@ mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/log
 
 # Now we need to cleanup the Configuration files
 # jira-application.properties
-JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
+JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_FOLDER}"
 
 # We need to use # instead of / in the sed expression to be able to support the / in the path
 # https://www.unix.com/shell-programming-and-scripting/148161-expand-environment-variable-sed-when-variable-contains-slash.html
-sed -i 's#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g' ${RSYNC_DST_JIRA_DATA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
+sed -i 's#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g' ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
 
 # We trigger a backup of the data on MySQL Server
 
