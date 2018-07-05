@@ -56,19 +56,29 @@ else
     fi
 fi
 
-#Recreate the excluded folders
+# Recreate the excluded folders
 mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/caches
 mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/tmp
 mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/log
 
 # Now we need to cleanup the Configuration files
-# jira-application.properties
+# Update jira-application.properties
 JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
 
 # User the " instead of ' for the sed command to allow the expansion of the variables
 # We need to use # instead of / in the sed expression to be able to support the / in the path
 # https://www.unix.com/shell-programming-and-scripting/148161-expand-environment-variable-sed-when-variable-contains-slash.html
 sed -i "s#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g" ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
+
+# Update of dbconfig.xml
+DB_NEW_CONNECTION_STRING="$(config_get DB_NEW_CONNECTION_STRING)"
+DB_NEW_USERNAME="$(config_get DB_NEW_USERNAME)"
+DB_NEW_PASSWORD="$(config_get DB_NEW_PASSWORD)"
+
+# We need to make sure to escape any ampersand sign to avoid problems with sed
+sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" ${RSYNC_DST_JIRA_FOLDER}/dbconfig.xml
+sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_JIRA_FOLDER}/dbconfig.xml
+sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_JIRA_FOLDER}/dbconfig.xml
 
 # We trigger a backup of the data on MySQL Server
 
