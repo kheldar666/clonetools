@@ -75,8 +75,8 @@ DB_NEW_CONNECTION_STRING="$(config_get DB_NEW_CONNECTION_STRING)"
 DB_NEW_USERNAME="$(config_get DB_NEW_USERNAME)"
 DB_NEW_PASSWORD="$(config_get DB_NEW_PASSWORD)"
 
-# We need to make sure to escape any ampersand sign to avoid problems with sed
-sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
+# Unlike in the test file, because of the way we load the variable, we don't need to escape again here.
+sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
 sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
 sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
 
