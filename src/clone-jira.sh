@@ -47,12 +47,12 @@ mkdir -p ${RSYNC_DST_JIRA_FOLDER}/temp
 
 echo "Synching JIRA Data files from Production to Local Folder"
 if [ ${#RSYNC_SSH_OPTIONS} -eq 0 ] ; then
-    rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" --exclude="jira/log"  ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+    rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="tmp" --exclude="log"  ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
 else
     if [ ${#RSYNC_REMOTE_SUDO} -eq 0 ] ; then
-        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" --exclude="jira/log" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="tmp" --exclude="log" -e "${RSYNC_SSH_OPTIONS}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     else
-        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="jira/tmp" --exclude="jira/log" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
+        rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="tmp" --exclude="log" -e "${RSYNC_SSH_OPTIONS}" --rsync-path="${RSYNC_REMOTE_SUDO}" ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     fi
 fi
 
