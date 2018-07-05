@@ -16,9 +16,16 @@ DB_NEW_PASSWORD=somepassword
 
 cp -f ./dbconfig.xml.sample ./dbconfig.xml.sample.output
 
-# Need to add the empty striung at the beginning for OSX compatibility
-# https://myshittycode.com/2014/07/24/os-x-sed-extra-characters-at-the-end-of-l-command-error/
+# Need to add the empty string at the beginning for OSX compatibility
 #echo ${DB_NEW_CONNECTION_STRING//&/\\&}
-sed -i "" "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" dbconfig.xml.sample.output
-sed -i "" "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" dbconfig.xml.sample.output
-sed -i "" "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" dbconfig.xml.sample.output
+
+# FOR MAC OSX
+# https://myshittycode.com/2014/07/24/os-x-sed-extra-characters-at-the-end-of-l-command-error/
+#sed -i "" "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" dbconfig.xml.sample.output
+#sed -i "" "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" dbconfig.xml.sample.output
+#sed -i "" "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" dbconfig.xml.sample.output
+
+# FOR CENTOS
+sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING//&/\\&}</url>#g" dbconfig.xml.sample.output
+sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" dbconfig.xml.sample.output
+sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" dbconfig.xml.sample.output
