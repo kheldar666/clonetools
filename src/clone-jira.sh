@@ -17,9 +17,9 @@ RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
 /etc/init.d/jira stop
 if [ $? -ne 0 ]; then
 	read -p "JIRA did not shutdown properly, exiting? (Y/N)" yn
-	case $yn in
+	case ${yn} in
 		[Yy]* ) exit 1;;
-		[Nn]* ) echo "Continuing....";
+		[Nn]* ) echo "Continuing....";;
 	esac
 fi
 # Now we sync all data from production to local folders

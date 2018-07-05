@@ -17,9 +17,9 @@ RSYNC_DST_CONF_DATA_FOLDER="$(config_get RSYNC_DST_CONF_DATA_FOLDER)"
 /etc/init.d/confluence stop
 if [ $? -ne 1 ]; then
     read -p "Confluence did not shutdown properly, exiting? (Y/N)" yn
-    case $yn in
+    case ${yn} in
             [Yy]* ) exit 1;;
-            [Nn]* ) echo "Continuing....";
+            [Nn]* ) echo "Continuing....";;
     esac
 fi
 

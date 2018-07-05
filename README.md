@@ -1,7 +1,9 @@
 # JIRA and Confluence cloning tools
 
 This is a set of scripts allowing to Clone completely an instance of JIRA or Confluence from Server A to B in one script
- execution.
+ execution. The main purpose is to be able to clone a Production
+ environment back to a Test environment for testing purposes (ie:
+ testing an Upgrade or new plugins).
 
 Fell free to contribute to improve this tool.
 
@@ -19,3 +21,21 @@ To clone a standard installation of JIRA/Confluence (installed as 'root') you wi
 ## Instructions
 
 1. To create your own configuration, please create the file config.cfg next to config.cfg.defaults
+
+
+## Configuration Options
+
+### Rsync options
+
+* `RSYNC_OPTIONS`
+* `RSYNC_SSH_OPTIONS`
+* `RSYNC_REMOTE_SUDO`
+* `RSYNC_SRC_JIRA_FOLDER`
+* `RSYNC_DST_JIRA_FOLDER`
+* `RSYNC_SRC_JIRA_DATA_FOLDER`
+* `RSYNC_DST_JIRA_DATA_FOLDER`
+* `RSYNC_SRC_CONF_FOLDER`
+* `RSYNC_DST_CONF_FOLDER`
+* `RSYNC_SRC_CONF_DATA_FOLDER`
+* `RSYNC_DST_CONF_DATA_FOLDER`
+
