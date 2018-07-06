@@ -25,6 +25,6 @@ RSYNC_DST_CONF_DATA_FOLDER=/path/to/local/folder/data/confluence
 
 # Database Configuration
 # BE CAREFUL! All & and ; signs MUST be escaped
-DB_NEW_CONNECTION_STRING=jdbc:mysql://1.2.3.4:3306/jira?useUnicode=true\&amp\;characterEncoding=UTF8\&amp\;useSSL=false
-DB_NEW_USERNAME=someuser
-DB_NEW_PASSWORD=somepassword
+DB_JIRA_NEW_CONNECTION_STRING=jdbc:mysql://1.2.3.4:3306/jira?useUnicode=true\&amp\;characterEncoding=UTF8\&amp\;useSSL=false
+DB_JIRA_NEW_USERNAME=someuser
+DB_JIRA_NEW_PASSWORD=somepassword

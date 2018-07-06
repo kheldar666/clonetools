@@ -96,9 +96,9 @@ updateJiraConfigFiles() {
     sed -i "s#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g" ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
 
     # Update of dbconfig.xml
-    DB_NEW_CONNECTION_STRING="$(config_get DB_NEW_CONNECTION_STRING)"
-    DB_NEW_USERNAME="$(config_get DB_NEW_USERNAME)"
-    DB_NEW_PASSWORD="$(config_get DB_NEW_PASSWORD)"
+    DB_NEW_CONNECTION_STRING="$(config_get DB_JIRA_NEW_CONNECTION_STRING)"
+    DB_NEW_USERNAME="$(config_get DB_JIRA_NEW_USERNAME)"
+    DB_NEW_PASSWORD="$(config_get DB_JIRA_NEW_PASSWORD)"
 
     # Unlike in the test file, because of the way we load the variable, we don't need to escape again here.
     sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
