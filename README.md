@@ -1,4 +1,4 @@
-# JIRA and Confluence cloning tools
+# JIRA and Confluence cloning tools (WIP)
 
 This is a set of scripts allowing to Clone completely an instance of JIRA or Confluence from Server A to B in one script
  execution. The main purpose is to be able to clone a Production
