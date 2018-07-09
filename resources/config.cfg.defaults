@@ -13,7 +13,6 @@ RSYNC_REMOTE_SUDO=
 RSYNC_SRC_JIRA_FOLDER=someuser@somehost:/path/to/jira
 RSYNC_DST_JIRA_FOLDER=/path/to/local/folder/jira
 
-
 RSYNC_SRC_JIRA_DATA_FOLDER=someuser@somehost:/path/to/data/jira
 RSYNC_DST_JIRA_DATA_FOLDER=/path/to/local/folder/data/jira
 
@@ -25,6 +24,18 @@ RSYNC_DST_CONF_DATA_FOLDER=/path/to/local/folder/data/confluence
 
 # Database Configuration
 # BE CAREFUL! All & and ; signs MUST be escaped
-DB_JIRA_NEW_CONNECTION_STRING=jdbc:mysql://1.2.3.4:3306/jira?useUnicode=true\&amp\;characterEncoding=UTF8\&amp\;useSSL=false
-DB_JIRA_NEW_USERNAME=someuser
-DB_JIRA_NEW_PASSWORD=somepassword
+DB_JIRA_DST_CONNECTION_STRING=jdbc:mysql://1.2.3.4:3306/jira?useUnicode=true\&amp\;characterEncoding=UTF8\&amp\;useSSL=false
+DB_JIRA_DST_HOST=somehost
+DB_JIRA_DST_USERNAME=someuser
+DB_JIRA_DST_PASSWORD=somepassword
+DB_JIRA_DST_DBNAME=somedbname
+
+# Source Server(s)
+DB_JIRA_SRC_HOST=somehost
+DB_JIRA_SRC_USERNAME=someuser
+DB_JIRA_SRC_PASSWORD=somepassword
+DB_JIRA_SRC_DBNAME=somedbname
+
+# MySQL Options
+MYSQL_SRC_MYSQLDUMP=/usr/bin/mysqldump
+MYSQL_LOCAL_BACKUP_DIR=/path/to/backup/
