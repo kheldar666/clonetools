@@ -129,6 +129,8 @@ backupSourceDb() {
     TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
     DUMP="$(config_get MYSQL_LOCAL_BACKUP_DIR)/BKUP_${TIMESTAMP}.sql"
 
+    mkdir -p "$(config_get MYSQL_LOCAL_BACKUP_DIR)"
+
     REMOTE_MYSQL_COMMAND="$MYSQLDUMP --force --opt -h $MYSQL_HOST --user=$MYSQL_USER -p$MYSQL_PASSWORD --databases $MYSQL_DB"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
 }
