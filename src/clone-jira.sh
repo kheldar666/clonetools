@@ -6,17 +6,6 @@ scriptName=`basename $0`
 # loading external configuration
 source ./lib/config.shlib;
 
-SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
-
-RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
-RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
-
-RSYNC_SRC_JIRA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_FOLDER)"
-RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_JIRA_FOLDER)"
-
-RSYNC_SRC_JIRA_DATA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_DATA_FOLDER)"
-RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
-
 # Help Screen
 helpScreen() {
   echo "${scriptName} [OPTIONS]
@@ -47,6 +36,13 @@ syncJiraProgramFiles() {
     # Now we sync all data from production to local folders
     echo "Synching JIRA Program files from Production to Local Folder"
 
+    SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
+    RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
+    RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
+
+    RSYNC_SRC_JIRA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_FOLDER)"
+    RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_JIRA_FOLDER)"
+
     # Making sure the destination folders exists
     mkdir -p ${RSYNC_DST_JIRA_FOLDER}
     mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}
@@ -70,6 +66,14 @@ syncJiraProgramFiles() {
 
 syncJiraDataFiles() {
     echo "Synching JIRA Data files from Production to Local Folder"
+
+    SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
+    RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
+    RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
+
+    RSYNC_SRC_JIRA_DATA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_DATA_FOLDER)"
+    RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
+
     if [ ${#SSH_COMMAND} -eq 0 ] ; then
         rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="tmp" --exclude="log"  ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
     else
@@ -119,7 +123,7 @@ updateJiraConfigFiles() {
 }
 # We trigger a backup of the data on MySQL Server
 backupSourceDb() {
-    # Update of dbconfig.xml
+    SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_SRC_HOST)"
     MYSQL_HOST="$(config_get DB_JIRA_SRC_HOST)"
     MYSQL_USER="$(config_get DB_JIRA_SRC_USERNAME)"
     MYSQL_PASSWORD="$(config_get DB_JIRA_SRC_PASSWORD)"
