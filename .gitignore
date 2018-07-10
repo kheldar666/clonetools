@@ -2,3 +2,5 @@
 *.iml
 .idea/*
 resources/config.cfg
+test/test.sql
+test/dbconfig.xml.sample.output

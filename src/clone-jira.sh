@@ -36,12 +36,12 @@ syncJiraProgramFiles() {
     # Now we sync all data from production to local folders
     echo "Synching JIRA Program files from Production to Local Folder"
 
-    SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
-    RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
-    RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
+    local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
+    local RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
+    local RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
 
-    RSYNC_SRC_JIRA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_FOLDER)"
-    RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_JIRA_FOLDER)"
+    local RSYNC_SRC_JIRA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_FOLDER)"
+    local RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_JIRA_FOLDER)"
 
     # Making sure the destination folders exists
     mkdir -p ${RSYNC_DST_JIRA_FOLDER}
@@ -67,12 +67,12 @@ syncJiraProgramFiles() {
 syncJiraDataFiles() {
     echo "Synching JIRA Data files from Production to Local Folder"
 
-    SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
-    RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
-    RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
+    local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no -l $(config_get SSH_USER)"
+    local RSYNC_OPTIONS="$(config_get RSYNC_OPTIONS)"
+    local RSYNC_REMOTE_SUDO="$(config_get RSYNC_REMOTE_SUDO)"
 
-    RSYNC_SRC_JIRA_DATA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_DATA_FOLDER)"
-    RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
+    local RSYNC_SRC_JIRA_DATA_FOLDER="$(config_get SSH_USER)@$(config_get SSH_SRC_HOST):$(config_get RSYNC_SRC_JIRA_DATA_FOLDER)"
+    local RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
 
     if [ ${#SSH_COMMAND} -eq 0 ] ; then
         rsync ${RSYNC_OPTIONS} --exclude="caches" --exclude="tmp" --exclude="log"  ${RSYNC_SRC_JIRA_DATA_FOLDER} ${RSYNC_DST_JIRA_DATA_FOLDER}
@@ -93,7 +93,8 @@ syncJiraDataFiles() {
 updateJiraConfigFiles() {
     # Now we need to cleanup the Configuration files
     # Update jira-application.properties
-    JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
+    local RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
+    local JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
 
     # User the " instead of ' for the sed command to allow the expansion of the variables
     # We need to use # instead of / in the sed expression to be able to support the / in the path
@@ -101,9 +102,9 @@ updateJiraConfigFiles() {
     sed -i "s#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g" ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
 
     # Update of dbconfig.xml
-    DB_NEW_CONNECTION_STRING="$(config_get DB_JIRA_DST_CONNECTION_STRING)"
-    DB_NEW_USERNAME="$(config_get DB_JIRA_DST_USERNAME)"
-    DB_NEW_PASSWORD="$(config_get DB_JIRA_DST_PASSWORD)"
+    local DB_NEW_CONNECTION_STRING="$(config_get DB_JIRA_DST_CONNECTION_STRING)"
+    local DB_NEW_USERNAME="$(config_get DB_JIRA_DST_USERNAME)"
+    local DB_NEW_PASSWORD="$(config_get DB_JIRA_DST_PASSWORD)"
 
     # Unlike in the test file, because of the way we load the variable, we don't need to escape again here.
     if [[ "${OSTYPE}" == "linux-gnu" ]]; then
@@ -122,24 +123,77 @@ updateJiraConfigFiles() {
     fi
 }
 # We trigger a backup of the data on MySQL Server
-backupSourceDb() {
-    SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_SRC_HOST)"
-    MYSQL_HOST="$(config_get DB_JIRA_SRC_HOST)"
-    MYSQL_USER="$(config_get DB_JIRA_SRC_USERNAME)"
-    MYSQL_PASSWORD="$(config_get DB_JIRA_SRC_PASSWORD)"
-    MYSQL_DB="$(config_get DB_JIRA_SRC_DBNAME)"
-    MYSQLDUMP="$(config_get MYSQL_SRC_MYSQLDUMP)"
+transferDatabase() {
+    local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_SRC_HOST)"
+    local MYSQL_HOST="$(config_get DB_JIRA_SRC_HOST)"
+    local MYSQL_USER="$(config_get DB_JIRA_SRC_USERNAME)"
+    local MYSQL_PASSWORD="$(config_get DB_JIRA_SRC_PASSWORD)"
+    local MYSQL_DB="$(config_get DB_JIRA_SRC_DBNAME)"
+    local MYSQLDUMP="$(config_get MYSQL_SRC_MYSQLDUMP)"
 
-    TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-    DUMP="$(config_get MYSQL_LOCAL_BACKUP_DIR)/BKUP_${TIMESTAMP}.sql"
+    local TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+    local DUMP="$(config_get MYSQL_LOCAL_BACKUP_DIR)/BKUP_${TIMESTAMP}.sql"
 
     mkdir -p "$(config_get MYSQL_LOCAL_BACKUP_DIR)"
 
-    REMOTE_MYSQL_COMMAND="$MYSQLDUMP --force --opt -h $MYSQL_HOST --user=$MYSQL_USER -p$MYSQL_PASSWORD --databases $MYSQL_DB"
+    local REMOTE_MYSQL_COMMAND="$MYSQLDUMP --force --opt -h $MYSQL_HOST --user=$MYSQL_USER -p$MYSQL_PASSWORD --databases $MYSQL_DB"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
+
+    # Now we cleanup the file before creating the second DB
+    local JIRA_SRC_BASE_URL="$(config_get JIRA_SRC_BASE_URL)"
+    local JIRA_DST_BASE_URL="$(config_get JIRA_DST_BASE_URL)"
+    local JIRA_SRC_DBNAME="$(config_get DB_JIRA_SRC_DBNAME)"
+    local JIRA_DST_DBNAME="$(config_get DB_JIRA_DST_DBNAME)"
+
+    if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+        # FOR LINUX
+        # Replace URL references
+        sed -i "s#${JIRA_SRC_BASE_URL//\./\\.}#${JIRA_DST_BASE_URL}#g" ${DUMP}
+
+        # Need to update the Create and Use statements
+        local ORG_STRING=$(sed -n "s#\(.*Current Database[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
+        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+        sed -i "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
+
+
+        local ORG_STRING=$(sed -n "s#\(CREATE DATABASE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
+        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+        sed -i "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
+
+        local ORG_STRING=$(sed -n "s#\(USE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
+        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+        sed -i "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
+
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # FOR MAC OSX
+        # Need to add the empty string at the beginning for OSX compatibility
+        # https://myshittycode.com/2014/07/24/os-x-sed-extra-characters-at-the-end-of-l-command-error/
+        LC_CTYPE=C sed -i "" "s#${JIRA_SRC_BASE_URL//\./\\.}#${JIRA_DST_BASE_URL}#g" ${DUMP}
+
+        local ORG_STRING=$(sed -n "s#\(.*Current Database[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
+        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+        LC_CTYPE=C sed -i "" "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
+
+
+        local ORG_STRING=$(sed -n "s#\(CREATE DATABASE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
+        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+        LC_CTYPE=C sed -i "" "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
+
+        local ORG_STRING=$(sed -n "s#\(USE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
+        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+    else
+        echo "Unsupported OS :${OSTYPE}. Exiting...."
+        exit 1
+    fi
+
+
 }
 
-# We must cleanup the backup before restoring the data
 
 # We now need to restore the Data in the UAT DB
 
@@ -182,9 +236,8 @@ if [ ${RESUME} -lt 4 ] ; then
 fi
 
 if [ ${RESUME} -lt 5 ] ; then
-    backupSourceDb
+    transferDatabase
 fi
-
 
 echo "----------------------------------------------"
 echo "JIRA Cloning is Done. Have a great day ahead !"
