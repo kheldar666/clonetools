@@ -252,7 +252,6 @@ restoreDatabase() {
     local MYSQL_HOST="$(config_get DB_JIRA_DST_HOST)"
     local MYSQL_USER="$(config_get DB_JIRA_DST_USERNAME)"
     local MYSQL_PASSWORD="$(config_get DB_JIRA_DST_PASSWORD)"
-    local MYSQL_DB="$(config_get DB_JIRA_DST_DBNAME)"
     local MYSQL="$(config_get MYSQL_DST_MYSQL)"
 
     local REMOTE_MYSQL_COMMAND="${MYSQL} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -h ${MYSQL_HOST}"
