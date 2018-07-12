@@ -4,3 +4,5 @@
 resources/config.cfg
 test/test.sql
 test/dbconfig.xml.sample.output
+src/lastbackup.tmp
+test/testdmp.txt

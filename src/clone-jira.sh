@@ -139,59 +139,93 @@ transferDatabase() {
     local REMOTE_MYSQL_COMMAND="$MYSQLDUMP --force --opt -h $MYSQL_HOST --user=$MYSQL_USER -p$MYSQL_PASSWORD --databases $MYSQL_DB"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
 
+    echo ${DUMP} > ./lastbackup.tmp
+
+    echo "MySQL Backup File saved as : ${DUMP}"
+}
+
+updateDBFileContent() {
+    # We first check if the last backup was done and the file name saved in the proper tmp file
+    if [ ! -f ./lastbackup.tmp ]; then
+        echo "lastbackup.tmp file not found! Aborting..."
+        exit 1
+    fi
+
+    local DUMP=$(cat ./lastbackup.tmp)
+
+    echo "Backup File Location : ${DUMP}"
+
     # Now we cleanup the file before creating the second DB
     local JIRA_SRC_BASE_URL="$(config_get JIRA_SRC_BASE_URL)"
     local JIRA_DST_BASE_URL="$(config_get JIRA_DST_BASE_URL)"
     local JIRA_SRC_DBNAME="$(config_get DB_JIRA_SRC_DBNAME)"
     local JIRA_DST_DBNAME="$(config_get DB_JIRA_DST_DBNAME)"
 
+
+    #Look for the first match and quit
+    local ORG_STRING=$(sed -n '/Current/{p;q;}'  ${DUMP})
+    local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+    ORG_STRING="$(escape_var "${ORG_STRING}")"
+    UPT_STRING="$(escape_var "${UPT_STRING}")"
+    # Replace only the first occurrence for performance reason
     if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-        # FOR LINUX
-        # Replace URL references
-        sed -i "s#${JIRA_SRC_BASE_URL//\./\\.}#${JIRA_DST_BASE_URL}#g" ${DUMP}
-
-        # Need to update the Create and Use statements
-        local ORG_STRING=$(sed -n "s#\(.*Current Database[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
-        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
-
-        sed -i "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
-
-
-        local ORG_STRING=$(sed -n "s#\(CREATE DATABASE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
-        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
-
-        sed -i "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
-
-        local ORG_STRING=$(sed -n "s#\(USE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
-        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
-
-        sed -i "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
-
+        sed -i "0,/${ORG_STRING//\*/\\*}/s/${ORG_STRING//\*/\\*}/${UPT_STRING}/" ${DUMP}
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # FOR MAC OSX
-        # Need to add the empty string at the beginning for OSX compatibility
-        # https://myshittycode.com/2014/07/24/os-x-sed-extra-characters-at-the-end-of-l-command-error/
-        LC_CTYPE=C sed -i "" "s#${JIRA_SRC_BASE_URL//\./\\.}#${JIRA_DST_BASE_URL}#g" ${DUMP}
-
-        local ORG_STRING=$(sed -n "s#\(.*Current Database[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
-        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
-
-        LC_CTYPE=C sed -i "" "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
-
-
-        local ORG_STRING=$(sed -n "s#\(CREATE DATABASE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
-        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
-
-        LC_CTYPE=C sed -i "" "s#${ORG_STRING//\*/\\*}#${UPT_STRING}#g" ${DUMP}
-
-        local ORG_STRING=$(sed -n "s#\(USE[^\`]*\`${JIRA_SRC_DBNAME}\`\)#\1#p"  ${DUMP})
-        local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+        LC_CTYPE=C sed -i "" "1,/${ORG_STRING//\*/\\*}/s/${ORG_STRING//\*/\\*}/${UPT_STRING}/" ${DUMP}
     else
         echo "Unsupported OS :${OSTYPE}. Exiting...."
         exit 1
     fi
 
+    echo "'Current Database' information updated : ${ORG_STRING} > ${UPT_STRING}"
 
+    local ORG_STRING=$(sed -n '/CREATE/{p;q;}' ${DUMP})
+    local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+    ORG_STRING="$(escape_var "${ORG_STRING}")"
+    UPT_STRING="$(escape_var "${UPT_STRING}")"
+    # Replace only the first occurrence for performance reason
+    if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+        sed -i "0,/${ORG_STRING}/s/${ORG_STRING}/${UPT_STRING}/" ${DUMP}
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        LC_CTYPE=C sed -i "" "1,/${ORG_STRING}/s/${ORG_STRING}/${UPT_STRING}/" ${DUMP}
+    else
+        echo "Unsupported OS :${OSTYPE}. Exiting...."
+        exit 1
+    fi
+    echo "'CREATE DATABASE' statement updated : ${ORG_STRING} > ${UPT_STRING}"
+
+    #Look for the first match and quit
+    local ORG_STRING=$(sed -n '/USE/{p;q;}' ${DUMP})
+    local UPT_STRING=${ORG_STRING/${JIRA_SRC_DBNAME}/${JIRA_DST_DBNAME}}
+
+    ORG_STRING="$(escape_var "${ORG_STRING}")"
+    UPT_STRING="$(escape_var "${UPT_STRING}")"
+    # Replace only the first occurrence for performance reason
+    if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+        sed -i "0,/${ORG_STRING}/s/${ORG_STRING}/${UPT_STRING}/" ${DUMP}
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        LC_CTYPE=C sed -i "" "1,/${ORG_STRING}/s/${ORG_STRING}/${UPT_STRING}/" ${DUMP}
+    else
+        echo "Unsupported OS :${OSTYPE}. Exiting...."
+        exit 1
+    fi
+    echo "'USE' statement updated : ${ORG_STRING} > ${UPT_STRING}"
+
+    # Finally, Replace ALL URL references (that takes time...)
+    if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+        sed -i "s#${JIRA_SRC_BASE_URL//\./\\.}#${JIRA_DST_BASE_URL}#g" ${DUMP}
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        LC_CTYPE=C sed -i "" "s#${JIRA_SRC_BASE_URL//\./\\.}#${JIRA_DST_BASE_URL}#g" ${DUMP}
+    else
+        echo "Unsupported OS :${OSTYPE}. Exiting...."
+        exit 1
+    fi
+
+    #Once the update is done we delete the tmp file holding the backup name
+    #rm -f ./lastbackup.tmp
+    echo "MySQL Backup File updated with new values"
 }
 
 
@@ -239,6 +273,9 @@ if [ ${RESUME} -lt 5 ] ; then
     transferDatabase
 fi
 
+if [ ${RESUME} -lt 6 ] ; then
+    updateDBFileContent
+fi
 echo "----------------------------------------------"
 echo "JIRA Cloning is Done. Have a great day ahead !"
 echo "----------------------------------------------"

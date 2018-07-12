@@ -9,3 +9,12 @@ config_get() {
     fi
     printf -- "%s" "${val}";
 }
+
+escape_var(){
+   var=${1}
+
+   var=${var//\*/\\*}
+   var=${var//\//\\/}
+
+   printf -- "%s" "${var}";
+}
