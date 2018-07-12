@@ -87,6 +87,8 @@ syncJiraDataFiles() {
     mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/caches
     mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/tmp
     mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}/log
+
+    chown -R jira ${RSYNC_DST_JIRA_DATA_FOLDER}
 }
 
 updateJiraConfigFiles() {
