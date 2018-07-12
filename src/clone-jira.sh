@@ -259,6 +259,12 @@ restoreDatabase() {
 
     rm -f ./lastupdtbackup.tmp
 
+    read -p "Delete the local MySQL Backup file? (Y/N)" yn
+    case ${yn} in
+        [Yy]* ) echo "Deleting the Backup File" && rm -f ${DUMP};;
+        [Nn]* ) echo "Keeping the Backup File : ${DUMP}";;
+    esac
+
     echo "MySQL Backup Restored on : ${MYSQL_HOST}"
 }
 
