@@ -136,7 +136,7 @@ transferDatabase() {
 
     mkdir -p "$(config_get MYSQL_LOCAL_BACKUP_DIR)"
 
-    local REMOTE_MYSQL_COMMAND="$MYSQLDUMP --force --opt -h $MYSQL_HOST --user=$MYSQL_USER -p$MYSQL_PASSWORD --databases $MYSQL_DB"
+    local REMOTE_MYSQL_COMMAND="${MYSQLDUMP} --force --opt -h ${MYSQL_HOST} --user=${MYSQL_USER} -p${MYSQL_PASSWORD} --databases ${MYSQL_DB}"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
 
     echo ${DUMP} > ./lastbackup.tmp
@@ -222,16 +222,45 @@ updateDBFileContent() {
         echo "Unsupported OS :${OSTYPE}. Exiting...."
         exit 1
     fi
-
-    #Once the update is done we delete the tmp file holding the backup name
+    #Once the update is done we delete the tmp file holding the backup name to avoid double substitution
     rm -f ./lastbackup.tmp
+
+    #And we create a new tmp file for the next step
+    echo ${DUMP} > ./lastupdtbackup.tmp
+
     echo "MySQL Backup File updated with new values"
 }
+# We trigger a backup of the data on MySQL Server
+restoreDatabase() {
+    # We first check if the last backup was done and the file name saved in the proper tmp file
+    if [ ! -f ./lastupdtbackup.tmp ]; then
+        echo "lastupdtbackup.tmp file not found! Aborting..."
+        exit 1
+    fi
 
+    local DUMP=$(cat ./lastbackup.tmp)
 
-# We now need to restore the Data in the UAT DB
+    echo "Backup File Location : ${DUMP}"
+
+    local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_DST_HOST)"
+    local MYSQL_HOST="$(config_get DB_JIRA_DST_HOST)"
+    local MYSQL_USER="$(config_get DB_JIRA_DST_USERNAME)"
+    local MYSQL_PASSWORD="$(config_get DB_JIRA_DST_PASSWORD)"
+    local MYSQL_DB="$(config_get DB_JIRA_DST_DBNAME)"
+    local MYSQL="$(config_get MYSQL_DST_MYSQL)"
+
+    local REMOTE_MYSQL_COMMAND="${MYSQL} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -h ${MYSQL_HOST} ${MYSQL_DB}"
+    ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" < ${DUMP}
+
+    rm -f ./lastupdtbackup.tmp
+
+    echo "MySQL Backup Restored on : ${MYSQL_HOST}"
+}
 
 # Finally we start the services
+startJIRA() {
+    /etc/init.d/jira start
+}
 
 # Read Script Args
 RESUME=0
@@ -276,6 +305,15 @@ fi
 if [ ${RESUME} -lt 6 ] ; then
     updateDBFileContent
 fi
+
+if [ ${RESUME} -lt 7 ] ; then
+    restoreDatabase
+fi
+
+if [ ${RESUME} -lt 8 ] ; then
+    startJIRA
+fi
+
 echo "----------------------------------------------"
 echo "JIRA Cloning is Done. Have a great day ahead !"
 echo "----------------------------------------------"

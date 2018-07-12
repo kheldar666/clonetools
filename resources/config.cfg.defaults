@@ -38,6 +38,7 @@ DB_JIRA_SRC_DBNAME=somedbname
 
 # MySQL Options
 MYSQL_SRC_MYSQLDUMP=/usr/bin/mysqldump
+MYSQL_DST_MYSQL=/usr/bin/mysqldump
 MYSQL_LOCAL_BACKUP_DIR=/path/to/backup/
 
 # JIRA Urls
