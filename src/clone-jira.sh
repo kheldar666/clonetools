@@ -45,7 +45,6 @@ syncJiraProgramFiles() {
 
     # Making sure the destination folders exists
     mkdir -p ${RSYNC_DST_JIRA_FOLDER}
-    mkdir -p ${RSYNC_DST_JIRA_DATA_FOLDER}
 
     # Launching the rsync process
 
