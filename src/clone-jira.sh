@@ -90,6 +90,7 @@ syncJiraDataFiles() {
 }
 
 updateJiraConfigFiles() {
+    echo "Updating JIRA Configuration Files"
     # Now we need to cleanup the Configuration files
     # Update jira-application.properties
     local RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
@@ -124,6 +125,8 @@ updateJiraConfigFiles() {
 }
 # We trigger a backup of the data on MySQL Server
 transferDatabase() {
+    echo "Backup of the MySQL Database to local folder"
+
     local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_SRC_HOST)"
     local MYSQL_HOST="$(config_get DB_JIRA_SRC_HOST)"
     local MYSQL_USER="$(config_get DB_JIRA_SRC_USERNAME)"
@@ -145,6 +148,8 @@ transferDatabase() {
 }
 
 updateDBFileContent() {
+    echo "Updating MySQL Backup file with new values"
+
     # We first check if the last backup was done and the file name saved in the proper tmp file
     if [ ! -f ./lastbackup.tmp ]; then
         echo "lastbackup.tmp file not found! Aborting..."
@@ -232,13 +237,14 @@ updateDBFileContent() {
 }
 # We trigger a backup of the data on MySQL Server
 restoreDatabase() {
+    echo "Restoring MySQL Backup to target server"
     # We first check if the last backup was done and the file name saved in the proper tmp file
     if [ ! -f ./lastupdtbackup.tmp ]; then
         echo "lastupdtbackup.tmp file not found! Aborting..."
         exit 1
     fi
 
-    local DUMP=$(cat ./lastbackup.tmp)
+    local DUMP=$(cat ./lastupdtbackup.tmp)
 
     echo "Backup File Location : ${DUMP}"
 
