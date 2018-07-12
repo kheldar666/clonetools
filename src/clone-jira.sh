@@ -224,7 +224,7 @@ updateDBFileContent() {
     fi
 
     #Once the update is done we delete the tmp file holding the backup name
-    #rm -f ./lastbackup.tmp
+    rm -f ./lastbackup.tmp
     echo "MySQL Backup File updated with new values"
 }
 
