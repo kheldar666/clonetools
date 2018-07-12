@@ -255,7 +255,7 @@ restoreDatabase() {
     local MYSQL_DB="$(config_get DB_JIRA_DST_DBNAME)"
     local MYSQL="$(config_get MYSQL_DST_MYSQL)"
 
-    local REMOTE_MYSQL_COMMAND="${MYSQL} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -h ${MYSQL_HOST} ${MYSQL_DB}"
+    local REMOTE_MYSQL_COMMAND="${MYSQL} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -h ${MYSQL_HOST}"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" < ${DUMP}
 
     rm -f ./lastupdtbackup.tmp
