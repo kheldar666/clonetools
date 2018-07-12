@@ -93,6 +93,7 @@ updateJiraConfigFiles() {
     # Now we need to cleanup the Configuration files
     # Update jira-application.properties
     local RSYNC_DST_JIRA_DATA_FOLDER="$(config_get RSYNC_DST_JIRA_DATA_FOLDER)"
+    local RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_JIRA_FOLDER)"
     local JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
 
     # User the " instead of ' for the sed command to allow the expansion of the variables
