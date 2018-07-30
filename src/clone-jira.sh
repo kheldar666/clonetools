@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
+# TODO LIST
+# ---------
+# 1. Reorder Script steps to ensure consistency between attachments and issues
+# 2. Change JIRA Base URL >> https://confluence.atlassian.com/jirakb/how-do-i-manually-change-the-base-url-733940375.html
+# 3. Try to keep JIRA Indexes
+# 4. Update all jira property value in DB (storage and all) >> https://confluence.atlassian.com/jirakb/how-do-i-manually-change-the-base-url-733940375.html
+# 5. Turn off emails ?
+# 6. Update Tomcat server.xml context
+# 7. Should we stop/start remove JIRA ?
+
+
 # Script name
 scriptName=`basename $0`
 
@@ -10,7 +21,7 @@ source ./lib/config.shlib;
 helpScreen() {
   echo "${scriptName} [OPTIONS]
 
-    Bash utility for cloning a JIRA instance to anotehr Server
+    Bash utility for cloning a JIRA instance to another Server
 
     GitHub Project:
       https://github.com/kheldar666/clonetools
@@ -20,16 +31,67 @@ helpScreen() {
 "
 }
 
-stopJIRA() {
+stopLocalJIRA() {
     # First we need to stop local services
+    echo "Shutting down local Jira instance (destination)...."
     /etc/init.d/jira stop
     if [ $? -ne 0 ]; then
-        read -p "JIRA did not shutdown properly, exiting? (Y/N)" yn
+        read -p "Local JIRA instance did not shutdown properly, exiting? (Y/N)" yn
         case ${yn} in
             [Yy]* ) exit 1;;
             [Nn]* ) echo "Continuing....";;
         esac
     fi
+}
+
+stopRemoteJIRA() {
+    # Do we want to shutdown the remote instance ?
+    read -p "Do you want to shutdown the remote JIRA instance (source)? (Y/N)" yn1
+
+    if [ $? -ne 0 ]; then
+
+        case ${yn1} in
+            [Yy]* )
+                local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get SSH_SRC_HOST)"
+                local REMOTE_COMMAND="/etc/init.d/jira stop"
+                ${SSH_COMMAND} "${REMOTE_COMMAND}"
+                if [ $? -ne 0 ]; then
+                    read -p "Remote JIRA instance did not shutdown properly, exiting? (Y/N)" yn2
+                    case ${yn2} in
+                        [Yy]* ) exit 1;;
+                        [Nn]* ) echo "Continuing....";;
+                    esac
+                fi
+                ;;
+            [Nn]* )
+                echo "Continuing...."
+                ;;
+        esac
+    fi
+}
+
+# We trigger a backup of the data on MySQL Server
+transferDatabase() {
+    echo "Backup of the MySQL Database to local folder"
+
+    local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_SRC_HOST)"
+    local MYSQL_HOST="$(config_get DB_JIRA_SRC_HOST)"
+    local MYSQL_USER="$(config_get DB_JIRA_SRC_USERNAME)"
+    local MYSQL_PASSWORD="$(config_get DB_JIRA_SRC_PASSWORD)"
+    local MYSQL_DB="$(config_get DB_JIRA_SRC_DBNAME)"
+    local MYSQLDUMP="$(config_get MYSQL_SRC_MYSQLDUMP)"
+
+    local TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+    local DUMP="$(config_get MYSQL_LOCAL_BACKUP_DIR)/BKUP_${TIMESTAMP}.sql"
+
+    mkdir -p "$(config_get MYSQL_LOCAL_BACKUP_DIR)"
+
+    local REMOTE_MYSQL_COMMAND="${MYSQLDUMP} --force --opt -h ${MYSQL_HOST} --user=${MYSQL_USER} -p${MYSQL_PASSWORD} --databases ${MYSQL_DB}"
+    ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
+
+    echo ${DUMP} > ./lastbackup.tmp
+
+    echo "MySQL Backup File saved as : ${DUMP}"
 }
 
 syncJiraProgramFiles() {
@@ -99,54 +161,39 @@ updateJiraConfigFiles() {
     local RSYNC_DST_JIRA_FOLDER="$(config_get RSYNC_DST_JIRA_FOLDER)"
     local JIRA_NEW_HOME="jira\.home = ${RSYNC_DST_JIRA_DATA_FOLDER}"
 
-    # User the " instead of ' for the sed command to allow the expansion of the variables
-    # We need to use # instead of / in the sed expression to be able to support the / in the path
-    # https://www.unix.com/shell-programming-and-scripting/148161-expand-environment-variable-sed-when-variable-contains-slash.html
-    sed -i "s#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g" ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
 
     # Update of dbconfig.xml
     local DB_NEW_CONNECTION_STRING="$(config_get DB_JIRA_DST_CONNECTION_STRING)"
     local DB_NEW_USERNAME="$(config_get DB_JIRA_DST_USERNAME)"
     local DB_NEW_PASSWORD="$(config_get DB_JIRA_DST_PASSWORD)"
 
+    # Update of server.xml
+    local JIRA_SRC_HOST="$(config_get JIRA_SRC_HOST)"
+    local JIRA_DST_HOST="$(config_get JIRA_DST_HOST)"
+
+    # User the " instead of ' for the sed command to allow the expansion of the variables
+    # We need to use # instead of / in the sed expression to be able to support the / in the path
+    # https://www.unix.com/shell-programming-and-scripting/148161-expand-environment-variable-sed-when-variable-contains-slash.html
+
     # Unlike in the test file, because of the way we load the variable, we don't need to escape again here.
     if [[ "${OSTYPE}" == "linux-gnu" ]]; then
         # FOR LINUX
+        sed -i "s#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g" ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
         sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
         sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
         sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
+        sed -i "s#\"$(escape_var "${JIRA_SRC_HOST}")\"#\"${JIRA_DST_HOST}\"#g" ${RSYNC_DST_JIRA_FOLDER}/conf/server.xml
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # FOR MAC OSX
+        sed -i "" "s#^[^#]*jira\.home.*#${JIRA_NEW_HOME}#g" ${RSYNC_DST_JIRA_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
         sed -i "" "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
         sed -i "" "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
         sed -i "" "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_JIRA_DATA_FOLDER}/dbconfig.xml
+        sed -i "" "s#\"$(escape_var "${JIRA_SRC_HOST}")\"#\"${JIRA_DST_HOST}\"#g" ${RSYNC_DST_JIRA_FOLDER}/conf/server.xml
     else
         echo "Unsupported OS :${OSTYPE}. Exiting...."
         exit 1
     fi
-}
-# We trigger a backup of the data on MySQL Server
-transferDatabase() {
-    echo "Backup of the MySQL Database to local folder"
-
-    local SSH_COMMAND="ssh -i $(config_get SSH_PRIV_KEY) -o StrictHostKeyChecking=no $(config_get SSH_USER)@$(config_get DB_JIRA_SRC_HOST)"
-    local MYSQL_HOST="$(config_get DB_JIRA_SRC_HOST)"
-    local MYSQL_USER="$(config_get DB_JIRA_SRC_USERNAME)"
-    local MYSQL_PASSWORD="$(config_get DB_JIRA_SRC_PASSWORD)"
-    local MYSQL_DB="$(config_get DB_JIRA_SRC_DBNAME)"
-    local MYSQLDUMP="$(config_get MYSQL_SRC_MYSQLDUMP)"
-
-    local TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-    local DUMP="$(config_get MYSQL_LOCAL_BACKUP_DIR)/BKUP_${TIMESTAMP}.sql"
-
-    mkdir -p "$(config_get MYSQL_LOCAL_BACKUP_DIR)"
-
-    local REMOTE_MYSQL_COMMAND="${MYSQLDUMP} --force --opt -h ${MYSQL_HOST} --user=${MYSQL_USER} -p${MYSQL_PASSWORD} --databases ${MYSQL_DB}"
-    ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
-
-    echo ${DUMP} > ./lastbackup.tmp
-
-    echo "MySQL Backup File saved as : ${DUMP}"
 }
 
 updateDBFileContent() {
@@ -237,6 +284,7 @@ updateDBFileContent() {
 
     echo "MySQL Backup File updated with new values"
 }
+
 # We trigger a backup of the data on MySQL Server
 restoreDatabase() {
     echo "Restoring MySQL Backup to target server"
@@ -296,11 +344,12 @@ done
 
 # Functions Call
 if [ ${RESUME} -lt 1 ] ; then
-    stopJIRA
+    stopLocalJIRA
+    #stopRemoteJIRA
 fi
 
 if [ ${RESUME} -lt 2 ] ; then
-    syncJiraProgramFiles
+    transferDatabase
 fi
 
 if [ ${RESUME} -lt 3 ] ; then
@@ -312,7 +361,7 @@ if [ ${RESUME} -lt 4 ] ; then
 fi
 
 if [ ${RESUME} -lt 5 ] ; then
-    transferDatabase
+    syncJiraProgramFiles
 fi
 
 if [ ${RESUME} -lt 6 ] ; then

@@ -7,3 +7,4 @@ test/dbconfig.xml.sample.output
 src/lastbackup.tmp
 src/lastupdtbackup.tmp
 test/testdmp.txt
+test/server.xml
