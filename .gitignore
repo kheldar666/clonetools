@@ -4,7 +4,9 @@
 resources/config.cfg
 test/test.sql
 test/dbconfig.xml.sample.output
-src/lastbackup.tmp
-src/lastupdtbackup.tmp
+src/lastjirabackup.tmp
+src/lastupdtjirabackup.tmp
+src/lastconfbackup.tmp
+src/lastupdtconfbackup.tmp
 test/testdmp.txt
 test/server.xml

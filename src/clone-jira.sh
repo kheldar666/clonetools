@@ -27,7 +27,8 @@ helpScreen() {
       https://github.com/kheldar666/clonetools
 
     Options:
-      -r|--resume=STEP           Resuming the Script after step STEP. Default is 0.
+      -r|--resume=STEP          Resuming the Script after step STEP. Default is 0.
+      --help                    This menu
 "
 }
 
@@ -89,7 +90,7 @@ transferDatabase() {
     local REMOTE_MYSQL_COMMAND="${MYSQLDUMP} --force --opt -h ${MYSQL_HOST} --user=${MYSQL_USER} -p${MYSQL_PASSWORD} --databases ${MYSQL_DB}"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" > ${DUMP}
 
-    echo ${DUMP} > ./lastbackup.tmp
+    echo ${DUMP} > ./lastjirabackup.tmp
 
     echo "MySQL Backup File saved as : ${DUMP}"
 }
@@ -200,12 +201,12 @@ updateDBFileContent() {
     echo "Updating MySQL Backup file with new values"
 
     # We first check if the last backup was done and the file name saved in the proper tmp file
-    if [ ! -f ./lastbackup.tmp ]; then
-        echo "lastbackup.tmp file not found! Aborting..."
+    if [ ! -f ./lastjirabackup.tmp ]; then
+        echo "lastjirabackup.tmp file not found! Aborting..."
         exit 1
     fi
 
-    local DUMP=$(cat ./lastbackup.tmp)
+    local DUMP=$(cat ./lastjirabackup.tmp)
 
     echo "Backup File Location : ${DUMP}"
 
@@ -277,10 +278,10 @@ updateDBFileContent() {
         exit 1
     fi
     #Once the update is done we delete the tmp file holding the backup name to avoid double substitution
-    rm -f ./lastbackup.tmp
+    rm -f ./lastjirabackup.tmp
 
     #And we create a new tmp file for the next step
-    echo ${DUMP} > ./lastupdtbackup.tmp
+    echo ${DUMP} > ./lastupdtjirabackup.tmp
 
     echo "MySQL Backup File updated with new values"
 }
@@ -289,12 +290,12 @@ updateDBFileContent() {
 restoreDatabase() {
     echo "Restoring MySQL Backup to target server"
     # We first check if the last backup was done and the file name saved in the proper tmp file
-    if [ ! -f ./lastupdtbackup.tmp ]; then
-        echo "lastupdtbackup.tmp file not found! Aborting..."
+    if [ ! -f ./lastupdtjirabackup.tmp ]; then
+        echo "lastupdtjirabackup.tmp file not found! Aborting..."
         exit 1
     fi
 
-    local DUMP=$(cat ./lastupdtbackup.tmp)
+    local DUMP=$(cat ./lastupdtjirabackup.tmp)
 
     echo "Backup File Location : ${DUMP}"
 
@@ -307,7 +308,7 @@ restoreDatabase() {
     local REMOTE_MYSQL_COMMAND="${MYSQL} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -h ${MYSQL_HOST}"
     ${SSH_COMMAND} "${REMOTE_MYSQL_COMMAND}" < ${DUMP}
 
-    rm -f ./lastupdtbackup.tmp
+    rm -f ./lastupdtjirabackup.tmp
 
     read -p "Delete the local MySQL Backup file? (Y/N)" yn
     case ${yn} in
@@ -331,6 +332,10 @@ do
         -r=*|--resume=*)
             RESUME="${i#*=}"
             shift
+        ;;
+        --help)
+            helpScreen
+            exit 1
         ;;
         *)
             # Unknown Option
