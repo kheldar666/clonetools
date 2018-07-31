@@ -1,6 +1,6 @@
 # Default Configuration. Please override all necessary value in config.cfg file
 
-# Configuration for SSH
+# Configuration for SSH (assume JIRA and Confluence are on the same server)
 SSH_USER=someuser
 SSH_PRIV_KEY=/path/to/private/key
 SSH_SRC_HOST=somehost
@@ -23,6 +23,12 @@ RSYNC_SRC_CONF_DATA_FOLDER=someuser@somehost:/path/to/data/confluence
 RSYNC_DST_CONF_DATA_FOLDER=/path/to/local/folder/data/confluence
 
 # Database Configuration
+# MySQL Options (assuming the same config for SRC and DST)
+MYSQL_SRC_MYSQLDUMP=/usr/bin/mysqldump
+MYSQL_DST_MYSQL=/usr/bin/mysqldump
+MYSQL_LOCAL_BACKUP_DIR=/path/to/backup/
+
+# JIRA Destination MySQL Server
 # BE CAREFUL! All & and ; signs MUST be escaped
 DB_JIRA_DST_CONNECTION_STRING=jdbc:mysql://1.2.3.4:3306/jira?useUnicode=true\&amp\;characterEncoding=UTF8\&amp\;useSSL=false
 DB_JIRA_DST_HOST=somehost
@@ -30,16 +36,11 @@ DB_JIRA_DST_USERNAME=someuser
 DB_JIRA_DST_PASSWORD=somepassword
 DB_JIRA_DST_DBNAME=somedbname
 
-# Source Server(s)
+# JIRA Source MySQL Server
 DB_JIRA_SRC_HOST=somehost
 DB_JIRA_SRC_USERNAME=someuser
 DB_JIRA_SRC_PASSWORD=somepassword
 DB_JIRA_SRC_DBNAME=somedbname
-
-# MySQL Options
-MYSQL_SRC_MYSQLDUMP=/usr/bin/mysqldump
-MYSQL_DST_MYSQL=/usr/bin/mysqldump
-MYSQL_LOCAL_BACKUP_DIR=/path/to/backup/
 
 # JIRA Urls
 JIRA_SRC_BASE_URL=https://www.example.com/jira
@@ -48,3 +49,25 @@ JIRA_DST_BASE_URL=https://uat.exemple/jira
 #JIRA Domains
 JIRA_SRC_HOST=src.domain.name.com
 JIRA_DST_HOST=dst.another.domain.com
+
+# Confluence Destination MySQL Server
+# BE CAREFUL! All & and ; signs MUST be escaped
+DB_CONF_DST_CONNECTION_STRING=jdbc:mysql://1.2.3.4:3306/jira?useUnicode=true\&amp\;characterEncoding=UTF8\&amp\;useSSL=false
+DB_CONF_DST_HOST=somehost
+DB_CONF_DST_USERNAME=someuser
+DB_CONF_DST_PASSWORD=somepassword
+DB_CONF_DST_DBNAME=somedbname
+
+# Confluence Source MySQL Server
+DB_CONF_SRC_HOST=somehost
+DB_CONF_SRC_USERNAME=someuser
+DB_CONF_SRC_PASSWORD=somepassword
+DB_CONF_SRC_DBNAME=somedbname
+
+# Confluence Urls
+CONF_SRC_BASE_URL=https://www.example.com/jira
+CONF_DST_BASE_URL=https://uat.exemple/jira
+
+# Confluence Domains
+CONF_SRC_HOST=src.domain.name.com
+CONF_DST_HOST=dst.another.domain.com
