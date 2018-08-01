@@ -116,6 +116,9 @@ syncConfProgramFiles() {
     #Recreate the excluded folders
     mkdir -p ${RSYNC_DST_CONF_FOLDER}/logs
     mkdir -p ${RSYNC_DST_CONF_FOLDER}/temp
+
+    chown -R confluence ${RSYNC_DST_CONF_FOLDER}/logs
+    chown -R confluence ${RSYNC_DST_CONF_FOLDER}/temp
 }
 
 syncConfDataFiles() {

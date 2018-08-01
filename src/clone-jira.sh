@@ -124,6 +124,9 @@ syncJiraProgramFiles() {
     #Recreate the excluded folders
     mkdir -p ${RSYNC_DST_JIRA_FOLDER}/logs
     mkdir -p ${RSYNC_DST_JIRA_FOLDER}/temp
+
+    chown -R jira ${RSYNC_DST_JIRA_FOLDER}/logs
+    chown -R jira ${RSYNC_DST_JIRA_FOLDER}/temp
 }
 
 syncJiraDataFiles() {
