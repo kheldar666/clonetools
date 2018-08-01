@@ -9,18 +9,20 @@ SSH_SRC_HOST=somehost
 RSYNC_OPTIONS=-rav --delete
 RSYNC_REMOTE_SUDO=
 
-#Source and Destination Folders
-RSYNC_SRC_JIRA_FOLDER=someuser@somehost:/path/to/jira
-RSYNC_DST_JIRA_FOLDER=/path/to/local/folder/jira
+# Source and Destination Folders
+# Don't forget trailing slash
 
-RSYNC_SRC_JIRA_DATA_FOLDER=someuser@somehost:/path/to/data/jira
-RSYNC_DST_JIRA_DATA_FOLDER=/path/to/local/folder/data/jira
+RSYNC_SRC_JIRA_FOLDER=/path/to/remote/jira/
+RSYNC_DST_JIRA_FOLDER=/path/to/local/jira/
 
-RSYNC_SRC_CONF_FOLDER=someuser@somehost:/path/to/confluence
-RSYNC_DST_CONF_FOLDER=/path/to/local/folder/confluence
+RSYNC_SRC_JIRA_DATA_FOLDER=/path/to/remote/data/jira/
+RSYNC_DST_JIRA_DATA_FOLDER=/path/to/local/data/jira/
 
-RSYNC_SRC_CONF_DATA_FOLDER=someuser@somehost:/path/to/data/confluence
-RSYNC_DST_CONF_DATA_FOLDER=/path/to/local/folder/data/confluence
+RSYNC_SRC_CONF_FOLDER=/path/to/remote/confluence/
+RSYNC_DST_CONF_FOLDER=/path/to/local/confluence/
+
+RSYNC_SRC_CONF_DATA_FOLDER=/path/to/remote/data/confluence/
+RSYNC_DST_CONF_DATA_FOLDER=/path/to/local/data/confluence/
 
 # Database Configuration
 # MySQL Options (assuming the same config for SRC and DST)
