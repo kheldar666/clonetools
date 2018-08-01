@@ -152,7 +152,7 @@ updateConfConfigFiles() {
     # Update jira-application.properties
     local RSYNC_DST_CONF_DATA_FOLDER="$(config_get RSYNC_DST_CONF_DATA_FOLDER)"
     local RSYNC_DST_CONF_FOLDER="$(config_get RSYNC_DST_CONF_FOLDER)"
-    local CONF_NEW_HOME="jira\.home = ${RSYNC_DST_CONF_DATA_FOLDER}"
+    local CONF_NEW_HOME="confluence\.home = ${RSYNC_DST_CONF_DATA_FOLDER}"
 
 
     # Update of dbconfig.xml
@@ -171,17 +171,17 @@ updateConfConfigFiles() {
     # Unlike in the test file, because of the way we load the variable, we don't need to escape again here.
     if [[ "${OSTYPE}" == "linux-gnu" ]]; then
         # FOR LINUX
-        sed -i "s#^[^#]*jira\.home.*#${CONF_NEW_HOME}#g" ${RSYNC_DST_CONF_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
-        sed -i "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/dbconfig.xml
-        sed -i "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/dbconfig.xml
-        sed -i "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/dbconfig.xml
+        sed -i "s#^[^#]*confluence\.home.*#${CONF_NEW_HOME}#g" ${RSYNC_DST_CONF_FOLDER}/confluence/WEB-INF/classes/confluence-init.properties
+        sed -i "s#<property name=\"hibernate\.connection\.url\">.*</property>#<property name=\"hibernate.connection.url\">${DB_NEW_CONNECTION_STRING}</property>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/confluence.cfg.xml
+        sed -i "s#<property name=\"hibernate\.connection\.username\">.*</property>#<property name=\"hibernate.connection.username\">${DB_NEW_USERNAME}</property>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/confluence.cfg.xml
+        sed -i "s#<property name=\"hibernate\.connection\.password\">.*</property>#<property name=\"hibernate.connection.password\">${DB_NEW_PASSWORD}</property>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/confluence.cfg.xml
         sed -i "s#\"$(escape_var "${CONF_SRC_HOST}")\"#\"${CONF_DST_HOST}\"#g" ${RSYNC_DST_CONF_FOLDER}/conf/server.xml
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # FOR MAC OSX
-        sed -i "" "s#^[^#]*jira\.home.*#${CONF_NEW_HOME}#g" ${RSYNC_DST_CONF_FOLDER}/atlassian-jira/WEB-INF/classes/jira-application.properties
-        sed -i "" "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/dbconfig.xml
-        sed -i "" "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/dbconfig.xml
-        sed -i "" "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/dbconfig.xml
+        sed -i "" "s#^[^#]*confluence\.home.*#${CONF_NEW_HOME}#g" ${RSYNC_DST_CONF_FOLDER}/confluence/WEB-INF/classes/confluence-init.properties
+        sed -i "" "s#<url>.*</url>#<url>${DB_NEW_CONNECTION_STRING}</url>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/confluence.cfg.xml
+        sed -i "" "s#<username>.*</username>#<username>${DB_NEW_USERNAME}</username>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/confluence.cfg.xml
+        sed -i "" "s#<password>.*</password>#<password>${DB_NEW_PASSWORD}</password>#g" ${RSYNC_DST_CONF_DATA_FOLDER}/confluence.cfg.xml
         sed -i "" "s#\"$(escape_var "${CONF_SRC_HOST}")\"#\"${CONF_DST_HOST}\"#g" ${RSYNC_DST_CONF_FOLDER}/conf/server.xml
     else
         echo "Unsupported OS :${OSTYPE}. Exiting...."
