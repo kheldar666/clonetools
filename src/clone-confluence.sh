@@ -357,11 +357,11 @@ if [ ${RESUME} -lt 3 ] ; then
 fi
 
 if [ ${RESUME} -lt 4 ] ; then
-    updateConfConfigFiles
+    syncConfProgramFiles
 fi
 
 if [ ${RESUME} -lt 5 ] ; then
-    syncConfProgramFiles
+    updateConfConfigFiles
 fi
 
 if [ ${RESUME} -lt 6 ] ; then

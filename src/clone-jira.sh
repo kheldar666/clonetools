@@ -365,11 +365,11 @@ if [ ${RESUME} -lt 3 ] ; then
 fi
 
 if [ ${RESUME} -lt 4 ] ; then
-    updateJiraConfigFiles
+    syncJiraProgramFiles
 fi
 
 if [ ${RESUME} -lt 5 ] ; then
-    syncJiraProgramFiles
+    updateJiraConfigFiles
 fi
 
 if [ ${RESUME} -lt 6 ] ; then
